@@ -1,4 +1,5 @@
 import storage from "./storage.js";
+import { createNextId } from "./helper.js";
 
 class Store {
   constructor(storage) {
@@ -13,6 +14,23 @@ class Store {
     );
   }
 
+  addHistory(keyword = "") {
+    keyword = keyword.trim();
+    if (!keyword) return;
+
+    const hasHistory = this.storage.historyData.some(
+      (item) => item.keyword === keyword
+    );
+    if (hasHistory) this.removeHistory(keyword);
+
+    const id = createNextId(this.storage.historyData);
+    const date = new Date();
+    this.storage.historyData.push({ id, keyword, date });
+    this.storage.historyData = [
+      ...this.storage.historyData.sort(this._sortHistory),
+    ];
+  }
+
   getKeywordList() {
     return [...this.storage.keywordData];
   }
@@ -22,7 +40,7 @@ class Store {
   }
 
   _sortHistory(history1, history2) {
-    return history2.date > history1.date;
+    return history2.date - history1.date;
   }
 
   removeHistory(keyword) {
@@ -32,5 +50,5 @@ class Store {
   }
 }
 
-const store = new Store("test");
+const store = new Store(storage);
 export default store;
