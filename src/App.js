@@ -7,72 +7,60 @@ import Tabs, { TabType } from "./componets/Tabs";
 import KeywordList from "./componets/KeywordList";
 import HistoryList from "./componets/HistoryList";
 
-class App extends React.Component {
-  constructor() {
-    super();
+const App = () => {
+  const [searchKeyword, setSearchKeyword] = React.useState("");
+  const [searchResult, setSearchResult] = React.useState([]);
+  const [submitted, setSubmitted] = React.useState(false);
+  const [selectedTab, setSelectedTab] = React.useState(TabType.KEYWORD);
 
-    this.state = {
-      searchKeyword: "",
-      searchResult: [],
-      submitted: false,
-      selectedTab: TabType.KEYWORD,
-    };
-  }
-
-  handleChangeInput(searchKeyword) {
+  const handleChangeInput = (searchKeyword) => {
     if (searchKeyword.length <= 0) {
-      this.handleReset();
+      handleReset();
     }
-    this.setState({ searchKeyword });
-  }
+    setSearchKeyword(searchKeyword);
+  };
 
-  search(searchKeyword) {
+  const search = (searchKeyword) => {
     const searchResult = store.search(searchKeyword);
 
-    this.setState({
-      searchResult,
-      submitted: true,
-      searchKeyword,
-    });
-  }
+    setSearchResult(searchResult);
+    setSubmitted(true);
+    setSearchKeyword(searchKeyword);
+  };
 
-  handleReset() {
-    this.setState({
-      searchKeyword: "",
-      searchResult: [],
-      submitted: false,
-    });
-  }
+  const handleReset = () => {
+    setSearchKeyword("");
+    setSearchResult([]);
+    setSubmitted(false);
+  };
 
-  render() {
-    return (
-      <>
-        <Header title="검색" />
-        <SearchForm
-          value={this.state.searchKeyword}
-          onChange={(event) => this.handleChangeInput(event)}
-          onReset={() => this.handleReset()}
-          onSubmit={() => this.search(this.state.searchKeyword)}
-        />
-        {this.state.submitted ? (
-          <SearchResult data={this.state.searchResult} />
-        ) : (
-          <>
-            <Tabs
-              selectedTab={this.state.selectedTab}
-              onChange={(selectedTab) => this.setState({ selectedTab })}
-            />
-            {this.state.selectedTab === TabType.KEYWORD && (
-              <KeywordList onClick={(keyword) => this.search(keyword)} />
-            )}
-            {this.state.selectedTab === TabType.HISTORY && (
-              <HistoryList onClick={(keyword) => this.search(keyword)} />
-            )}
-          </>
-        )}
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Header title="검색" />
+      <SearchForm
+        value={searchKeyword}
+        onChange={handleChangeInput}
+        onReset={handleReset}
+        onSubmit={() => search(searchKeyword)}
+      />
+      {submitted ? (
+        <SearchResult data={searchResult} />
+      ) : (
+        <>
+          <Tabs
+            selectedTab={selectedTab}
+            onChange={(selectedTab) => setSelectedTab(selectedTab)}
+          />
+          {selectedTab === TabType.KEYWORD && (
+            <KeywordList onClick={(keyword) => search(keyword)} />
+          )}
+          {selectedTab === TabType.HISTORY && (
+            <HistoryList onClick={(keyword) => search(keyword)} />
+          )}
+        </>
+      )}
+    </>
+  );
+};
 
 export default App;
